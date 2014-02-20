@@ -33,49 +33,8 @@ public class ImageFetcher extends AsyncTask<String, Void, Bitmap> {
     @Override
     protected Bitmap doInBackground(String... urls) {
         String imageUrl = urls[0];
-        SharedPreferences cachingSharedPreferences = context.getSharedPreferences(IMAGE_CACHING_PREFERENCES_FILE_NAME, 0);
-        String fileName = cachingSharedPreferences.getString(imageUrl, "");
-        Bitmap imageBitmap = null;
-        try {
-            imageBitmap = !fileName.isEmpty()? BitmapFactory.decodeStream(inputFileStream(fileName)):downloadAndCacheImage(imageUrl);
-        } catch (FileNotFoundException e) {
-            imageBitmap = downloadAndCacheImage(imageUrl);
-        }
-        return imageBitmap;
-    }
+        return  downloadAndCacheImage(imageUrl);
 
-    private FileInputStream inputFileStream(String fileName) throws FileNotFoundException {
-        if (isExternalStorageUsed()){
-            return new FileInputStream(context.getExternalCacheDir() + "/" + fileName);
-        }
-        else {
-            return new FileInputStream(context.getCacheDir() + "/" + fileName);
-        }
-    }
-
-    private boolean isExternalStorageUsed(){
-        SharedPreferences cachingSharedPreferences = context.getSharedPreferences(IMAGE_CACHING_PREFERENCES_FILE_NAME, 0);
-        String isExternalMediaUsedKey = "isExternalMediaUsed";
-        if (!cachingSharedPreferences.contains(isExternalMediaUsedKey)) {
-            boolean mExternalStorageAvailable = false;
-            boolean mExternalStorageWriteable = false;
-            String state = Environment.getExternalStorageState();
-
-            if (Environment.MEDIA_MOUNTED.equals(state)) {
-                // We can read and write the media
-                mExternalStorageAvailable = mExternalStorageWriteable = true;
-            } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-                // We can only read the media
-                mExternalStorageAvailable = true;
-                mExternalStorageWriteable = false;
-            } else {
-                // Something else is wrong. It may be one of many other states, but all we need
-                //  to know is we can neither read nor write
-                mExternalStorageAvailable = mExternalStorageWriteable = false;
-            }
-            cachingSharedPreferences.edit().putBoolean(isExternalMediaUsedKey,mExternalStorageAvailable && mExternalStorageWriteable).commit();
-        }
-        return cachingSharedPreferences.getBoolean(isExternalMediaUsedKey, false);
     }
 
     private Bitmap downloadAndCacheImage(String imageUrl) {
@@ -101,29 +60,6 @@ public class ImageFetcher extends AsyncTask<String, Void, Bitmap> {
     }
 
     private void cacheImage(Bitmap result, String imageUrl) {
-        String fileName = "image_" + System.currentTimeMillis() + ".png";
-        try {
-            ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
-            result.compress(Bitmap.CompressFormat.PNG, 90, imageBytes);
-            OutputStream imageOutputStream = outputFileStream(fileName);
-            imageOutputStream.write(imageBytes.toByteArray());
-            SharedPreferences cachingSharedPreferences = context.getSharedPreferences(IMAGE_CACHING_PREFERENCES_FILE_NAME, 0);
-            SharedPreferences.Editor editor = cachingSharedPreferences.edit();
-
-            editor.putString(imageUrl, fileName);
-            editor.commit();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private FileOutputStream outputFileStream(String fileName) throws FileNotFoundException {
-        if (isExternalStorageUsed())
-            return new FileOutputStream(context.getExternalCacheDir() + "/" + fileName);
-        else
-            return new FileOutputStream(context.getCacheDir() + "/" + fileName);
     }
 
     @Override
