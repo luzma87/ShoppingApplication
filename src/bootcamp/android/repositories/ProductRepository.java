@@ -1,17 +1,15 @@
 package bootcamp.android.repositories;
 
 import bootcamp.android.models.Product;
+import bootcamp.android.services.ContentFetcher;
+import bootcamp.android.services.ProductsParser;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ProductRepository {
 
-    public List<Product> getProducts() {
-        List<Product> products = new ArrayList<Product>();
-        products.add(new Product("TITLE1","DESC1"));
-        products.add(new Product("TITLE2","DESC2"));
-        products.add(new Product("TITLE3","DESC3"));
-        return products;
+    public ArrayList<Product> getProducts() {
+        String strJSONData = new ContentFetcher().fetchResponse("http://xplorationstudio.com/sample_images/products_json.json");
+        return new ProductsParser().parseProducts(strJSONData);
     }
 }

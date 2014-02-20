@@ -1,36 +1,49 @@
 package bootcamp.android.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.os.StrictMode;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.GridView;
 import bootcamp.android.R;
+import bootcamp.android.adapters.ShoppingItemsListAdapter;
 import bootcamp.android.models.Product;
 import bootcamp.android.repositories.ProductRepository;
 
-import java.util.List;
+import java.util.ArrayList;
+import static bootcamp.android.constants.Constants.*;
+
 
 public class ShoppingItemsListingActivity extends Activity {
 
-    private ProductRepository productRepository;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        productRepository = new ProductRepository();
-        LinearLayout layout = (LinearLayout) findViewById(R.id.listofitems);
-        List<Product> products  = productRepository.getProducts();
-        LayoutInflater layoutInflater = getLayoutInflater();
-        for (Product product : products) {
-            View view = layoutInflater.inflate(R.layout.product, null);
-            TextView titleView = (TextView)view.findViewById(R.id.title);
-            titleView.setText(product.getTitle());
-            TextView descriptionView = (TextView)view.findViewById(R.id.description);
-            descriptionView.setText(product.getDescription());
-            layout.addView(view);
-        }
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        final GridView gridView = (GridView) findViewById(R.id.grid_view);
+        ProductRepository productRepository = new ProductRepository();
+        ArrayList<Product> products = productRepository.getProducts();
+
+        gridView.setAdapter(new ShoppingItemsListAdapter(this, products));
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+
+                Product product = (Product) adapterView.getAdapter().getItem(position);
+                Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+                intent.putExtra(TITLE_KEY, product.getTitle());
+                intent.putExtra(DESCRIPTION_KEY, product.getDescription());
+                intent.putExtra(IMAGE_URL_KEY, product.getImageUrl());
+                startActivity(intent);
+            }
+        });
     }
 }
