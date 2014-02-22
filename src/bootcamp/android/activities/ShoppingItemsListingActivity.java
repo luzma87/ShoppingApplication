@@ -51,9 +51,7 @@ public class ShoppingItemsListingActivity extends Activity {
 
                 Product product = (Product) adapterView.getAdapter().getItem(position);
                 Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-                intent.putExtra(TITLE_KEY, product.getTitle());
-                intent.putExtra(DESCRIPTION_KEY, product.getDescription());
-                intent.putExtra(IMAGE_URL_KEY, product.getImageUrl());
+                intent.putExtra(PRODUCT_KEY, product);
                 startActivity(intent);
             }
         });
