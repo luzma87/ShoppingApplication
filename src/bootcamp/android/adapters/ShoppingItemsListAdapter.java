@@ -9,6 +9,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import androidplugins.Callback;
+import androidplugins.imagefetcher.ImageFetcher;
 import bootcamp.android.R;
 import bootcamp.android.models.Product;
 import bootcamp.android.services.ImageDownloader;
@@ -50,10 +52,18 @@ public class ShoppingItemsListAdapter extends BaseAdapter {
         TextView textView = (TextView) layout.findViewById(R.id.title);
         Product product = products.get(position);
         textView.setText(product.getTitle());
-        ImageDownloader imageDownloader = new ImageDownloader();
-        Bitmap bitmap = imageDownloader.downloadImage(product.getImageUrl());
-        imageView.setImageBitmap(bitmap);
+        ImageFetcher imageFetcher = new ImageFetcher(bitmapCallback(imageView), context);
+        imageFetcher.execute(product.getImageUrl());
         return layout;
+    }
+
+    private Callback<Bitmap> bitmapCallback(final ImageView imageView) {
+        return new Callback<Bitmap>() {
+            @Override
+            public void execute(Bitmap object) {
+                imageView.setImageBitmap(object);
+            }
+        };
     }
 }
 
